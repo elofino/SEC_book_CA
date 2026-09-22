@@ -175,7 +175,7 @@ def simulate(E0, E_initial, E_final, T, D_cm2_s, cT_M, fR0,
 
     # 2nd-order one-sided derivative at electrode.
     dRdx0 = (-3.0*cR[0, :] + 4.0*cR[1, :] - cR[2, :]) / (2.0*dx)
-    j_A_cm2 = F * D_cm2_s * dRdx0
+    j_A_cm2 = F * D_cm2_s * dRdx0 * 1e-3
 
     E = np.full_like(sol.t, E_final, dtype=float)
     return sol.t, E, x, cO, cR, j_A_cm2
