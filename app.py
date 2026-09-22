@@ -252,6 +252,7 @@ try:
         A0 = (eps_O*cO_initial + eps_R*cR_initial) * parallel_path_cm
 
     dA = A - A0
+    dA[0] = 0.0  # enforce the physical limit: a zero-thickness interfacial jump has no finite absorbance
     current_A = j * area_cm2
 
     diffusion_length_um = np.sqrt(D_cm2_s * t_end) * 1e4
@@ -260,7 +261,7 @@ try:
     m1, m2, m3, m4 = st.columns(4)
     m1.metric("Step duration", f"{t_end:.2f} s")
     m2.metric("√(D t)", f"{diffusion_length_um:.0f} µm")
-    m3.metric("Initial |i|", f"{abs(current_A[0])*1e6:.2f} µA")
+    m3.metric("|i| at first finite time", f"{abs(current_A[1])*1e6:.2f} µA")
     m4.metric("ΔA final", f"{dA[-1]:.4g}")
 
     if diffusion_length_um > 0.5*L_um:
@@ -277,11 +278,11 @@ try:
 
         with c1:
             fig, ax = plt.subplots(figsize=(6.2, 4.5))
+            mask = t > 0
             if log_time_display:
-                mask = t > 0
                 ax.semilogx(t[mask], current_A[mask]*1e6, lw=1.8)
             else:
-                ax.plot(t, current_A*1e6, lw=1.8)
+                ax.plot(t[mask], current_A[mask]*1e6, lw=1.8)
             ax.axhline(0, lw=0.7)
             ax.set_xlabel("t / s")
             ax.set_ylabel("i / µA")
@@ -291,11 +292,11 @@ try:
 
         with c2:
             fig, ax = plt.subplots(figsize=(6.2, 4.5))
+            mask = t > 0
             if log_time_display:
-                mask = t > 0
                 ax.semilogx(t[mask], dA[mask], lw=1.8)
             else:
-                ax.plot(t, dA, lw=1.8)
+                ax.plot(t[mask], dA[mask], lw=1.8)
             ax.axhline(0, lw=0.7)
             ax.set_xlabel("t / s")
             ax.set_ylabel("ΔA")
@@ -310,9 +311,10 @@ try:
             ax2 = ax.twinx()
             ax2.semilogx(t[mask], dA[mask], alpha=0.75)
         else:
-            ax.plot(t, E, label="E / V")
+            mask = t > 0
+            ax.plot(t[mask], E[mask], label="E / V")
             ax2 = ax.twinx()
-            ax2.plot(t, dA, alpha=0.75)
+            ax2.plot(t[mask], dA[mask], alpha=0.75)
 
         ax.set_xlabel("t / s")
         ax.set_ylabel("E / V")
