@@ -358,6 +358,24 @@ try:
             mime="text/csv",
         )
 
+        # Export the complete concentration field in long format:
+        # one row per (time, position) pair.
+        nt = len(t)
+        nx = len(x)
+        profiles_df = pd.DataFrame({
+            "time_s": np.repeat(t, nx),
+            "E_V": np.repeat(E, nx),
+            "x_um": np.tile(x * 1e4, nt),
+            "cO_mM": cO.T.reshape(-1) * 1e3,
+            "cR_mM": cR.T.reshape(-1) * 1e3,
+        })
+        st.download_button(
+            "Download concentration profiles (CSV)",
+            data=profiles_df.to_csv(index=False).encode("utf-8"),
+            file_name="reversible_ca_concentration_profiles.csv",
+            mime="text/csv",
+        )
+
 except Exception as exc:
     st.error(f"Simulation failed: {exc}")
 
